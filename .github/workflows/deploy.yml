@@ -1,0 +1,40 @@
+name: Deploy to OCI
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.OCI_HOST }}
+          username: ${{ secrets.OCI_USER }}
+          key: ${{ secrets.OCI_SSH_KEY }}
+          port: ${{ secrets.OCI_SSH_PORT || 22 }}
+          script: |
+            cd ~/my-ai
+
+            # Pull latest
+            git pull origin main
+
+            # Install server deps
+            cd server
+            npm ci --production
+
+            # Build frontend
+            cd ../client
+            npm ci
+            npm run build
+
+            # Copy build to server
+            rm -rf ../server/public
+            cp -r dist ../server/public
+
+            # Restart service
+            sudo systemctl restart my-ai-dashboard
+
+            echo "Deploy complete! Status: $(systemctl is-active my-ai-dashboard)"

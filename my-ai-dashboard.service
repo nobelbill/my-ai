@@ -1,0 +1,16 @@
+[Unit]
+Description=My AI Dashboard Server
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/my-ai/server
+ExecStart=/usr/bin/node src/index.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+EnvironmentFile=/home/ubuntu/my-ai/server/.env
+
+[Install]
+WantedBy=multi-user.target
