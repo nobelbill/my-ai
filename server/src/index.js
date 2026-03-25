@@ -10,10 +10,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Production: serve client build
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../client/dist')));
-}
+// Serve client build (production: public folder, dev: client/dist)
+const staticPath = fs.existsSync(path.join(__dirname, '../public'))
+  ? path.join(__dirname, '../public')
+  : path.join(__dirname, '../../client/dist');
+app.use(express.static(staticPath));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -105,14 +106,15 @@ app.get('/api/dashboard', async (req, res) => {
   res.json({ success: true, data: result });
 });
 
-// Production: SPA fallback
-if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
-    }
-  });
-}
+// SPA fallback
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    const indexPath = fs.existsSync(path.join(__dirname, '../public/index.html'))
+      ? path.join(__dirname, '../public/index.html')
+      : path.join(__dirname, '../../client/dist/index.html');
+    res.sendFile(indexPath);
+  }
+});
 
 app.listen(config.port, () => {
   console.log(`My AI server running on port ${config.port}`);
