@@ -1,0 +1,17 @@
+{
+  "commuteStation": {
+    "stationId": "",
+    "stationName": "고양시 정류장",
+    "routeNames": []
+  },
+  "homeStation": {
+    "stationId": "",
+    "stationName": "강남 정류장",
+    "routeNames": []
+  },
+  "notifications": {
+    "morning": "07:00",
+    "evening": "17:30"
+  },
+  "newsCategories": ["it", "economy", "politics"]
+}
