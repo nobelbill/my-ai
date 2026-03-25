@@ -1,17 +1,30 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert');
-const { buildPrompt } = require('../src/services/messageService');
+const { getMessage, QUOTES } = require('../src/services/messageService');
 
-describe('buildPrompt', () => {
-  it('creates morning prompt with weather context', () => {
-    const prompt = buildPrompt('morning', { temperature: '15', sky: '맑음' });
-    assert.ok(prompt.includes('아침'));
-    assert.ok(prompt.includes('15'));
-    assert.ok(prompt.includes('맑음'));
+describe('QUOTES', () => {
+  it('has quotes for all time slots', () => {
+    assert.ok(QUOTES.morning.length > 0);
+    assert.ok(QUOTES.afternoon.length > 0);
+    assert.ok(QUOTES.evening.length > 0);
+    assert.ok(QUOTES.idle.length > 0);
+  });
+});
+
+describe('getMessage', () => {
+  it('returns a message object for morning', () => {
+    const msg = getMessage('morning');
+    assert.ok(msg.quote);
+    assert.ok(msg.message);
   });
 
-  it('creates evening prompt for daily wrap-up', () => {
-    const prompt = buildPrompt('evening', { temperature: '10', sky: '흐림' });
-    assert.ok(prompt.includes('저녁') || prompt.includes('하루'));
+  it('returns a message object for afternoon', () => {
+    const msg = getMessage('afternoon');
+    assert.ok(msg.message);
+  });
+
+  it('falls back to idle for unknown slot', () => {
+    const msg = getMessage('unknown');
+    assert.ok(msg.message);
   });
 });

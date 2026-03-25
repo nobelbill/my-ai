@@ -15,12 +15,12 @@ function stripHtml(str) {
 }
 
 function parseNewsResponse(data) {
-  const items = data?.items || [];
-  return items.map(item => ({
-    title: stripHtml(item.title),
-    description: stripHtml(item.description),
-    link: item.originallink || item.link,
-    pubDate: item.pubDate,
+  const articles = data?.articles || [];
+  return articles.map(article => ({
+    title: stripHtml(article.title || ''),
+    description: stripHtml(article.description || ''),
+    link: article.url,
+    pubDate: article.publishedAt,
   }));
 }
 
@@ -30,11 +30,15 @@ async function getNews(category = 'it', count = 5) {
   if (cached) return cached;
 
   const query = CATEGORIES[category] || CATEGORIES.it;
-  const { data } = await axios.get('https://openapi.naver.com/v1/search/news.json', {
-    params: { query, display: count, sort: 'date' },
+  const { data } = await axios.get('https://newsapi.org/v2/everything', {
+    params: {
+      q: query,
+      language: 'ko',
+      pageSize: count,
+      sortBy: 'publishedAt',
+    },
     headers: {
-      'X-Naver-Client-Id': config.naverClientId,
-      'X-Naver-Client-Secret': config.naverClientSecret,
+      'X-Api-Key': config.newsApiKey,
     },
   });
 
