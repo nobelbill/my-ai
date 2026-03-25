@@ -4,8 +4,8 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const location = req.query.location || 'goyang';
-    const weather = await getWeather(location);
+    const { location, lat, lon } = req.query;
+    const weather = await getWeather(location || 'goyang', lat ? parseFloat(lat) : null, lon ? parseFloat(lon) : null);
     res.json({ success: true, data: weather });
   } catch (err) {
     console.error('Weather API error:', err.message);

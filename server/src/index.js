@@ -45,12 +45,13 @@ app.get('/api/dashboard', async (req, res) => {
   const hour = new Date().getHours();
   const slot = getTimeSlot(hour);
   const greeting = getGreeting(slot);
+  const { lat, lon } = req.query;
 
   const result = { slot, greeting, hour, cards: {} };
 
   try {
     const { getWeather } = require('./services/weatherService');
-    result.cards.weather = await getWeather().catch(() => null);
+    result.cards.weather = await getWeather('goyang', lat ? parseFloat(lat) : null, lon ? parseFloat(lon) : null).catch(() => null);
   } catch (e) {}
 
   try {

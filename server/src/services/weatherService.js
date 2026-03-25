@@ -49,24 +49,47 @@ function parseWeatherResponse(data) {
   };
 }
 
-async function getWeather(location = 'goyang') {
-  const cacheKey = `weather_${location}`;
+// 위경도 → 지역명 변환 (Open-Meteo geocoding reverse 대신 간단한 주소 API 사용)
+async function getLocationName(lat, lon) {
+  try {
+    const { data } = await axios.get('https://nominatim.openstreetmap.org/reverse', {
+      params: { lat, lon, format: 'json', 'accept-language': 'ko', zoom: 10 },
+      headers: { 'User-Agent': 'MyAI-Dashboard/1.0' },
+    });
+    // 시/구 단위로 표시
+    const addr = data.address || {};
+    return addr.city || addr.county || addr.town || addr.suburb || addr.state || '현재 위치';
+  } catch {
+    return '현재 위치';
+  }
+}
+
+async function getWeather(location = 'goyang', lat, lon) {
+  // GPS 좌표가 있으면 해당 좌표 사용, 없으면 프리셋 위치
+  const useLat = lat || getLocation(location).lat;
+  const useLon = lon || getLocation(location).lon;
+  const cacheKey = `weather_${useLat}_${useLon}`;
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  const loc = getLocation(location);
-
   const { data } = await axios.get('https://api.open-meteo.com/v1/forecast', {
     params: {
-      latitude: loc.lat,
-      longitude: loc.lon,
+      latitude: useLat,
+      longitude: useLon,
       current: 'temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m',
       timezone: 'Asia/Seoul',
     },
   });
 
   const result = parseWeatherResponse(data);
-  result.location = loc.name;
+
+  // GPS 좌표가 있으면 역지오코딩, 없으면 프리셋 이름
+  if (lat && lon) {
+    result.location = await getLocationName(lat, lon);
+  } else {
+    result.location = getLocation(location).name;
+  }
+
   cache.set(cacheKey, result);
   return result;
 }
