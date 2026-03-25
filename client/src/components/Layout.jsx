@@ -24,10 +24,10 @@ export default function Layout({ slot, theme }) {
       <WeatherCard data={cards.weather} theme={theme} delay={0.1} />
       <MessageCard data={cards.message} slot={slot} theme={theme} delay={0.2} />
 
-      {(slot === 'morning' || slot === 'evening') && (
+      {(slot === 'morning' || slot === 'evening') && cards.bus && (
         <BusCard
           data={cards.bus}
-          stationName={slot === 'morning' ? '고양시 정류장' : '강남 정류장'}
+          stationName={cards.busStation}
           type={slot === 'morning' ? 'commute' : 'home'}
           theme={theme}
           delay={0.3}

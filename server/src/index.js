@@ -58,12 +58,14 @@ app.get('/api/dashboard', async (req, res) => {
     result.cards.message = getMessage(slot);
   } catch (e) {}
 
+  // 버스 도착정보 (서울버스 API 통합)
   if (slot === 'morning') {
     try {
       const settings = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/settings.json'), 'utf-8'));
       if (settings.commuteStation?.stationId) {
-        const { getGyeonggiBusArrival } = require('./services/busService');
-        result.cards.bus = await getGyeonggiBusArrival(settings.commuteStation.stationId).catch(() => null);
+        const { getBusArrival } = require('./services/busService');
+        result.cards.bus = await getBusArrival(settings.commuteStation.stationId, settings.commuteStation.routeNames).catch(() => null);
+        result.cards.busStation = settings.commuteStation.stationName;
       }
     } catch (e) {}
   }
@@ -82,8 +84,9 @@ app.get('/api/dashboard', async (req, res) => {
     try {
       const settings = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/settings.json'), 'utf-8'));
       if (settings.homeStation?.stationId) {
-        const { getSeoulBusArrival } = require('./services/busService');
-        result.cards.bus = await getSeoulBusArrival(settings.homeStation.stationId).catch(() => null);
+        const { getBusArrival } = require('./services/busService');
+        result.cards.bus = await getBusArrival(settings.homeStation.stationId, settings.homeStation.routeNames).catch(() => null);
+        result.cards.busStation = settings.homeStation.stationName;
       }
     } catch (e) {}
   }

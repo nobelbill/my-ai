@@ -1,23 +1,24 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert');
-const { parseBusArrival, formatArrivalTime } = require('../src/services/busService');
+const { parseSeoulBusResponse } = require('../src/services/busService');
 
-describe('formatArrivalTime', () => {
-  it('converts seconds to minutes', () => {
-    assert.strictEqual(formatArrivalTime(180), '3분');
-    assert.strictEqual(formatArrivalTime(60), '1분');
-    assert.strictEqual(formatArrivalTime(30), '곧 도착');
+describe('parseSeoulBusResponse', () => {
+  it('parses Seoul bus XML response', () => {
+    const mockXml = `<?xml version="1.0" encoding="UTF-8"?>
+    <ServiceResult><msgBody><itemList>
+      <rtNm>9711</rtNm><arrmsg1>5분후[2번째 전]</arrmsg1><arrmsg2>17분후[5번째 전]</arrmsg2>
+      <adirection>양재역</adirection><stNm>고양경찰서</stNm>
+    </itemList></msgBody></ServiceResult>`;
+    const result = parseSeoulBusResponse(mockXml);
+    assert.strictEqual(result[0].routeName, '9711');
+    assert.strictEqual(result[0].firstArrival, '5분후[2번째 전]');
+    assert.strictEqual(result[0].direction, '양재역');
   });
-});
 
-describe('parseBusArrival', () => {
-  it('parses 경기버스 API response', () => {
-    const mockItems = [
-      { routeId: '1234', routeName: '9700', predictTime1: '5', predictTime2: '15', stationId: '5678' }
-    ];
-    const result = parseBusArrival(mockItems);
-    assert.strictEqual(result[0].routeName, '9700');
-    assert.strictEqual(result[0].firstArrival, '5분');
-    assert.strictEqual(result[0].secondArrival, '15분');
+  it('handles empty response', () => {
+    const mockXml = `<?xml version="1.0" encoding="UTF-8"?>
+    <ServiceResult><msgBody></msgBody></ServiceResult>`;
+    const result = parseSeoulBusResponse(mockXml);
+    assert.strictEqual(result.length, 0);
   });
 });
