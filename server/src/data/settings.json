@@ -13,5 +13,6 @@
     "morning": "07:00",
     "evening": "17:30"
   },
-  "newsCategories": ["it", "economy", "politics"]
+  "newsCategories": ["it", "economy", "politics"],
+  "watchStocks": ["두산에너빌리티", "루시드", "KORU", "3S", "로켓랩", "ASTS"]
 }

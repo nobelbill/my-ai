@@ -4,6 +4,7 @@ import WeatherCard from './WeatherCard';
 import BusCard from './BusCard';
 import NewsCard from './NewsCard';
 import MessageCard from './MessageCard';
+import StockCard from './StockCard';
 import { Loader2 } from 'lucide-react';
 
 export default function Layout({ slot, theme }) {
@@ -37,6 +38,8 @@ export default function Layout({ slot, theme }) {
       {(slot === 'afternoon' || slot === 'late_morning') && (
         <NewsCard data={cards.news} theme={theme} delay={0.3} />
       )}
+
+      <StockCard data={cards.stocks} theme={theme} delay={0.4} />
     </div>
   );
 }

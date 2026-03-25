@@ -33,12 +33,14 @@ const busRouter = require('./routes/bus');
 const newsRouter = require('./routes/news');
 const messageRouter = require('./routes/message');
 const settingsRouter = require('./routes/settings');
+const stockRouter = require('./routes/stock');
 
 app.use('/api/weather', weatherRouter);
 app.use('/api/bus', busRouter);
 app.use('/api/news', newsRouter);
 app.use('/api/message', messageRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/stock', stockRouter);
 
 // 통합 대시보드 데이터
 app.get('/api/dashboard', async (req, res) => {
@@ -57,6 +59,14 @@ app.get('/api/dashboard', async (req, res) => {
   try {
     const { getMessage } = require('./services/messageService');
     result.cards.message = getMessage(slot);
+  } catch (e) {}
+
+  // 관심 주식 (항상 표시)
+  try {
+    const { getStocks } = require('./services/stockService');
+    const settings = JSON.parse(fs.readFileSync(path.join(__dirname, 'data/settings.json'), 'utf-8'));
+    const symbols = settings.watchStocks || ['두산에너빌리티', '루시드', 'KORU', '3S', '로켓랩', 'ASTS'];
+    result.cards.stocks = await getStocks(symbols).catch(() => null);
   } catch (e) {}
 
   // 버스 도착정보 (서울버스 API 통합)
