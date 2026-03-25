@@ -54,18 +54,19 @@ async function getWeather(location = 'goyang') {
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  const { lat, lon } = getLocation(location);
+  const loc = getLocation(location);
 
   const { data } = await axios.get('https://api.open-meteo.com/v1/forecast', {
     params: {
-      latitude: lat,
-      longitude: lon,
+      latitude: loc.lat,
+      longitude: loc.lon,
       current: 'temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m',
       timezone: 'Asia/Seoul',
     },
   });
 
   const result = parseWeatherResponse(data);
+  result.location = loc.name;
   cache.set(cacheKey, result);
   return result;
 }

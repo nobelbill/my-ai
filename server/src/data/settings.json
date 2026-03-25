@@ -2,12 +2,12 @@
   "commuteStation": {
     "stationId": "35636",
     "stationName": "고양경찰서·토당청소년수련관(중)",
-    "routeNames": ["9711"]
+    "routeNames": ["9711", "9700"]
   },
   "homeStation": {
     "stationId": "22008",
     "stationName": "래미안아파트·파이낸셜뉴스",
-    "routeNames": ["9711"]
+    "routeNames": ["9711", "9700"]
   },
   "notifications": {
     "morning": "07:00",

@@ -1,5 +1,5 @@
 import Card from './Card';
-import { Cloud, Sun, CloudRain, CloudSnow, CloudDrizzle, Droplets, Wind } from 'lucide-react';
+import { Cloud, Sun, CloudRain, CloudSnow, CloudDrizzle, Droplets, Wind, MapPin } from 'lucide-react';
 
 const skyIcons = {
   '맑음': Sun,
@@ -23,7 +23,10 @@ export default function WeatherCard({ data, theme, delay = 0 }) {
     <Card theme={theme} delay={delay}>
       <div className="flex items-center justify-between">
         <div>
-          <p className={`text-sm font-medium ${theme.subtext} mb-1`}>오늘 날씨</p>
+          <div className={`flex items-center gap-1 text-sm font-medium ${theme.subtext} mb-1`}>
+            <MapPin className="w-3.5 h-3.5" />
+            <span>{data.location || '현재 위치'}</span>
+          </div>
           <p className={`text-4xl font-bold ${theme.text}`}>{data.temperature}°</p>
           <p className={`text-sm ${theme.subtext} mt-1`}>
             {data.sky} · 강수확률 {data.rainProbability}%
