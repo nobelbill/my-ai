@@ -1,33 +1,51 @@
 const axios = require('axios');
-const config = require('../config');
 const { SimpleCache } = require('../utils/cache');
 
 const cache = new SimpleCache(30 * 60 * 1000);
 
-const GRID_COORDS = {
-  goyang: { nx: 57, ny: 128 },
-  gangnam: { nx: 61, ny: 126 },
+// 위치별 위경도 (Open-Meteo용)
+const LOCATIONS = {
+  goyang: { lat: 37.6584, lon: 126.8320, name: '고양시' },
+  gangnam: { lat: 37.4979, lon: 127.0276, name: '강남구' },
 };
 
-function getNxNy(location) {
-  return GRID_COORDS[location] || GRID_COORDS.goyang;
+function getLocation(location) {
+  return LOCATIONS[location] || LOCATIONS.goyang;
 }
 
-const SKY_MAP = { '1': '맑음', '3': '구름많음', '4': '흐림' };
-const PTY_MAP = { '0': '없음', '1': '비', '2': '비/눈', '3': '눈', '4': '소나기' };
+// WMO Weather Code → 한국어
+const WMO_SKY = {
+  0: '맑음', 1: '대체로 맑음', 2: '구름 조금', 3: '흐림',
+  45: '안개', 48: '안개',
+  51: '이슬비', 53: '이슬비', 55: '이슬비',
+  61: '비', 63: '비', 65: '폭우',
+  71: '눈', 73: '눈', 75: '폭설',
+  80: '소나기', 81: '소나기', 82: '폭우',
+  95: '뇌우', 96: '뇌우', 99: '뇌우',
+};
+
+const WMO_PRECIPITATION = {
+  0: '없음', 1: '없음', 2: '없음', 3: '없음',
+  45: '없음', 48: '없음',
+  51: '이슬비', 53: '이슬비', 55: '이슬비',
+  61: '비', 63: '비', 65: '비',
+  71: '눈', 73: '눈', 75: '눈',
+  80: '소나기', 81: '소나기', 82: '소나기',
+  95: '비', 96: '비', 99: '비',
+};
 
 function parseWeatherResponse(data) {
-  const items = data.response?.body?.items?.item || [];
-  const map = {};
-  items.forEach(item => { map[item.category] = item.fcstValue; });
+  const current = data?.current;
+  if (!current) return null;
 
+  const code = current.weather_code;
   return {
-    temperature: map.TMP || map.T1H || '-',
-    sky: SKY_MAP[map.SKY] || '알 수 없음',
-    precipitation: PTY_MAP[map.PTY] || '알 수 없음',
-    rainProbability: map.POP || '0',
-    humidity: map.REH || '-',
-    windSpeed: map.WSD || '-',
+    temperature: String(Math.round(current.temperature_2m)),
+    sky: WMO_SKY[code] || '알 수 없음',
+    precipitation: WMO_PRECIPITATION[code] || '없음',
+    rainProbability: '0',
+    humidity: String(current.relative_humidity_2m || '-'),
+    windSpeed: String(Math.round((current.wind_speed_10m || 0) / 3.6 * 10) / 10), // km/h → m/s
   };
 }
 
@@ -36,25 +54,20 @@ async function getWeather(location = 'goyang') {
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  const { nx, ny } = getNxNy(location);
-  const now = new Date();
-  const baseDate = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  const { lat, lon } = getLocation(location);
 
-  const hours = now.getHours();
-  const baseTimes = [2, 5, 8, 11, 14, 17, 20, 23];
-  let baseTime = '0200';
-  for (const bt of baseTimes) {
-    if (hours >= bt + 1) baseTime = String(bt).padStart(2, '0') + '00';
-  }
-
-  // 공공데이터포털 인코딩 키는 이미 URL-encoded 상태이므로 직접 URL에 붙임 (이중 인코딩 방지)
-  const baseUrl = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst';
-  const qs = `serviceKey=${encodeURIComponent(config.weatherApiKey)}&numOfRows=50&pageNo=1&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`;
-  const { data } = await axios.get(`${baseUrl}?${qs}`);
+  const { data } = await axios.get('https://api.open-meteo.com/v1/forecast', {
+    params: {
+      latitude: lat,
+      longitude: lon,
+      current: 'temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m',
+      timezone: 'Asia/Seoul',
+    },
+  });
 
   const result = parseWeatherResponse(data);
   cache.set(cacheKey, result);
   return result;
 }
 
-module.exports = { getWeather, parseWeatherResponse, getNxNy };
+module.exports = { getWeather, parseWeatherResponse, getLocation };
