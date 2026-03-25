@@ -32,10 +32,9 @@ async function getGyeonggiBusArrival(stationId) {
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  const url = 'http://apis.data.go.kr/6410000/busarrivalservice/getBusArrivalList';
-  const { data } = await axios.get(url, {
-    params: { serviceKey: config.busApiKey, stationId },
-  });
+  const baseUrl = 'http://apis.data.go.kr/6410000/busarrivalservice/getBusArrivalList';
+  const qs = `serviceKey=${encodeURIComponent(config.busApiKey)}&stationId=${stationId}`;
+  const { data } = await axios.get(`${baseUrl}?${qs}`);
 
   const items = data?.response?.msgBody?.busArrivalList;
   const result = parseBusArrival(Array.isArray(items) ? items : items ? [items] : []);
@@ -48,10 +47,9 @@ async function getSeoulBusArrival(stId) {
   const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  const url = 'http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid';
-  const { data } = await axios.get(url, {
-    params: { serviceKey: config.busApiKey, arsId: stId },
-  });
+  const baseUrl = 'http://ws.bus.go.kr/api/rest/stationinfo/getStationByUid';
+  const qs = `serviceKey=${encodeURIComponent(config.busApiKey)}&arsId=${stId}`;
+  const { data } = await axios.get(`${baseUrl}?${qs}`);
 
   const { XMLParser } = require('fast-xml-parser');
   const parser = new XMLParser();

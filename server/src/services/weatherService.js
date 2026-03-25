@@ -47,14 +47,10 @@ async function getWeather(location = 'goyang') {
     if (hours >= bt + 1) baseTime = String(bt).padStart(2, '0') + '00';
   }
 
-  const url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst';
-  const { data } = await axios.get(url, {
-    params: {
-      serviceKey: config.weatherApiKey,
-      numOfRows: 50, pageNo: 1, dataType: 'JSON',
-      base_date: baseDate, base_time: baseTime, nx, ny,
-    },
-  });
+  // 공공데이터포털 인코딩 키는 이미 URL-encoded 상태이므로 직접 URL에 붙임 (이중 인코딩 방지)
+  const baseUrl = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst';
+  const qs = `serviceKey=${encodeURIComponent(config.weatherApiKey)}&numOfRows=50&pageNo=1&dataType=JSON&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`;
+  const { data } = await axios.get(`${baseUrl}?${qs}`);
 
   const result = parseWeatherResponse(data);
   cache.set(cacheKey, result);

@@ -34,7 +34,7 @@ export default function Layout({ slot, theme }) {
         />
       )}
 
-      {slot === 'afternoon' && (
+      {(slot === 'afternoon' || slot === 'late_morning') && (
         <NewsCard data={cards.news} theme={theme} delay={0.3} />
       )}
     </div>

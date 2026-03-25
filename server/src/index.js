@@ -54,8 +54,8 @@ app.get('/api/dashboard', async (req, res) => {
   } catch (e) {}
 
   try {
-    const { generateMessage } = require('./services/messageService');
-    result.cards.message = await generateMessage(slot, result.cards.weather).catch(() => null);
+    const { getMessage } = require('./services/messageService');
+    result.cards.message = getMessage(slot);
   } catch (e) {}
 
   if (slot === 'morning') {
@@ -68,7 +68,7 @@ app.get('/api/dashboard', async (req, res) => {
     } catch (e) {}
   }
 
-  if (slot === 'afternoon') {
+  if (slot === 'afternoon' || slot === 'late_morning') {
     try {
       const { getNews } = require('./services/newsService');
       result.cards.news = {};
