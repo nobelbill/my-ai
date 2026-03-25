@@ -63,3 +63,10 @@ pm2 start ecosystem.config.js
 - `KAKAO_APP_KEY`: [카카오 개발자](https://developers.kakao.com) 앱 키
 - `NAVER_CLIENT_ID/SECRET`: [네이버 개발자](https://developers.naver.com) 검색 API
 - `ANTHROPIC_API_KEY`: [Anthropic](https://console.anthropic.com) Claude API 키
+
+## 배포
+
+GitHub Actions로 `main` 브랜치 push 시 OCI 서버에 자동 배포됩니다.
+
+- 서버: `http://146.56.113.191:5000`
+- 포트: 5000 (systemd: my-ai-dashboard)
